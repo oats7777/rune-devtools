@@ -21,7 +21,7 @@ export default function runeDevtools(
 
         const script = `
 <script type="module">
-import { initDevtools } from '@rune-ts/devtools';
+import { initDevtools } from 'rune-devtools';
 initDevtools(${optionsJson});
 </script>`;
 

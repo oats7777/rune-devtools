@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "rune-ts": "^0.9.8",
-    "@rune-ts/devtools": "workspace:*"
+    "rune-devtools": "workspace:*"
   },
   "devDependencies": {
     "vite": "^6.0.0",

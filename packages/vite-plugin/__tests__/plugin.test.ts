@@ -12,7 +12,7 @@ describe('vite-plugin-rune-devtools', () => {
     const plugin = runeDevtools();
     const html = '<html><head></head><body></body></html>';
     const result = (plugin.transformIndexHtml as any).handler(html, { server: {} });
-    expect(result).toContain('@rune-ts/devtools');
+    expect(result).toContain('rune-devtools');
     expect(result).toContain('initDevtools(');
   });
 
