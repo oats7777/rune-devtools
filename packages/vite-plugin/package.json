@@ -1,6 +1,7 @@
 {
   "name": "rune-devtools-vite",
   "version": "1.0.0",
+  "description": "Vite plugin for rune-devtools — auto-injects devtools in dev mode",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",

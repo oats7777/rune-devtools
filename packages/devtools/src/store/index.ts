@@ -18,7 +18,7 @@ export class DevtoolsStore {
   private _onRedrawCallbacks: ((record: RedrawRecord) => void)[] = [];
   private _onListViewMutationCallbacks: ((record: ListViewOpRecord) => void)[] = [];
 
-  constructor(maxEvents = DEFAULTS.maxEvents) {
+  constructor(maxEvents: number = DEFAULTS.maxEvents) {
     this.components = new ComponentStore();
     this.events = new EventStore(maxEvents);
     this.timeline = new TimelineStore(maxEvents);

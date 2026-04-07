@@ -1,6 +1,7 @@
 {
   "name": "rune-devtools",
   "version": "1.0.0",
+  "description": "Browser devtools overlay for the Rune framework",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -15,7 +16,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && tsc --emitDeclarationOnly --outDir dist",
     "dev": "vite build --watch"
   },
   "peerDependencies": {
