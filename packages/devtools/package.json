@@ -19,6 +19,9 @@
   "peerDependencies": {
     "rune-ts": ">=0.9.8"
   },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  },
   "dependencies": {
     "@fxts/core": "^1.4.0"
   }

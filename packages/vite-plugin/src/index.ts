@@ -1,10 +1,4 @@
-// Plugin type import — vite may not be installed in this worktree, using any fallback
-let Plugin: any;
-try {
-  Plugin = require('vite');
-} catch {
-  // vite not available, that's ok — type only
-}
+import type { Plugin } from 'vite';
 
 export interface VitePluginRuneDevtoolsOptions {
   position?: 'bottom' | 'top';
@@ -15,7 +9,7 @@ export interface VitePluginRuneDevtoolsOptions {
 
 export default function runeDevtools(
   options: VitePluginRuneDevtoolsOptions = {},
-): any {
+): Plugin {
   const optionsJson = JSON.stringify(options);
 
   return {

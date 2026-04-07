@@ -23,14 +23,19 @@ importers:
       rune-ts:
         specifier: '>=0.9.8'
         version: 0.9.8
+    devDependencies:
+      vite:
+        specifier: ^6.0.0
+        version: 6.4.2
 
   packages/vite-plugin:
     dependencies:
       '@rune-ts/devtools':
         specifier: workspace:*
         version: link:../devtools
+    devDependencies:
       vite:
-        specifier: ^5.0.0 || ^6.0.0
+        specifier: ^6.0.0
         version: 6.4.2
 
 packages:
@@ -1268,7 +1273,7 @@ snapshots:
       debug: 4.4.3
       es-module-lexer: 1.7.0
       pathe: 2.0.3
-      vite: 7.3.2
+      vite: 6.4.2
     transitivePeerDependencies:
       - '@types/node'
       - jiti
