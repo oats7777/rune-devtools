@@ -43,15 +43,15 @@ importers:
         specifier: ^0.9.8
         version: 0.9.8
     devDependencies:
+      rune-devtools-vite:
+        specifier: workspace:*
+        version: link:../vite-plugin
       typescript:
         specifier: ^5.3.0
         version: 5.9.3
       vite:
         specifier: ^6.0.0
         version: 6.4.2
-      vite-plugin-rune-devtools:
-        specifier: workspace:*
-        version: link:../vite-plugin
 
   packages/vite-plugin:
     dependencies:

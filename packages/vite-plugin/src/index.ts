@@ -13,7 +13,7 @@ export default function runeDevtools(
   const optionsJson = JSON.stringify(options);
 
   return {
-    name: 'vite-plugin-rune-devtools',
+    name: 'rune-devtools-vite',
     transformIndexHtml: {
       order: 'pre',
       handler(html, ctx) {

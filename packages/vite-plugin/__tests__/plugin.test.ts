@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import runeDevtools from '../src/index';
 
-describe('vite-plugin-rune-devtools', () => {
+describe('rune-devtools-vite', () => {
   it('returns a Vite plugin object', () => {
     const plugin = runeDevtools();
-    expect(plugin.name).toBe('vite-plugin-rune-devtools');
+    expect(plugin.name).toBe('rune-devtools-vite');
     expect(plugin.transformIndexHtml).toBeDefined();
   });
 

@@ -1,4 +1,4 @@
-# vite-plugin-rune-devtools
+# rune-devtools-vite
 
 ## 1.0.0
 
