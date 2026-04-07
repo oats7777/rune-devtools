@@ -135,15 +135,8 @@ export class TreePanel {
 
   private _collectNodes(node: TreeNode): void {
     this._nodeMap.set(node.viewId, node);
-    // Access children via the element's child container (indirect approach)
-    // We walk through the store instead to avoid exposing private internals.
-    const childSnapshots = this._store.components.getChildren(node.viewId);
-    for (const snap of childSnapshots) {
-      const childNode = this._nodeMap.get(snap.viewId);
-      if (childNode) {
-        // already collected by the node itself; recurse
-        this._collectNodes(childNode);
-      }
+    for (const child of node.children) {
+      this._collectNodes(child);
     }
   }
 

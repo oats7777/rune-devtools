@@ -10,17 +10,14 @@ export type { DevtoolsOptions, DevtoolsPlugin, DevtoolsPluginAPI } from './types
 export { DEVTOOLS_MARKER } from './constants';
 
 // Base is not exported from rune-ts — derive from prototype chain
-const Base: any = Object.getPrototypeOf(View.prototype).constructor ?? View;
+// Chain: Base → VirtualView → View, so we need 2 levels up
+const VirtualViewProto = Object.getPrototypeOf(View.prototype);
+const Base: any = Object.getPrototypeOf(VirtualViewProto)?.constructor ?? VirtualViewProto?.constructor ?? View;
 
-// eventHelper is not exported — access via patching a known method that receives it,
-// or derive from a View instance's internal usage. If rune-ts adds the export later,
-// import directly. For now, set to null and skip event interceptors if unavailable.
-let eventHelper: any = null;
-try {
-  // Attempt to find eventHelper through rune-ts internals
-  // This may need a PR to rune-ts to export eventHelper
-  eventHelper = (rune as any)._eventHelper ?? null;
-} catch { /* graceful skip */ }
+// eventHelper is not exported from rune-ts — event listener tracking unavailable.
+// dispatchEvent interception still works via Base.prototype.dispatchEvent.
+// TODO: PR to rune-ts to export eventHelper for full event tracking.
+const eventHelper: any = null;
 
 export function initDevtools(options: DevtoolsOptions = {}): () => void {
   const runeInstance = options.rune ?? rune;

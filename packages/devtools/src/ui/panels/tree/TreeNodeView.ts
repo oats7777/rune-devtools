@@ -37,6 +37,8 @@ export class TreeNode {
   private _childContainer: HTMLElement;
   private _children: TreeNode[] = [];
 
+  get children(): readonly TreeNode[] { return this._children; }
+
   // Row sub-elements that need updating
   private _dotEl: HTMLElement;
   private _nameEl: HTMLElement;
