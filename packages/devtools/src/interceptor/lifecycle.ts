@@ -27,7 +27,16 @@ export function installLifecycleInterceptors(
       isSSR: false,
       timestamp: performance.now(),
     };
-    store.components.register(snapshot);
+    store.components.register(snapshot, view);
+
+    // Mark DOM element for highlight detection (after render, element should exist)
+    try {
+      const element = view.element?.();
+      if (element instanceof HTMLElement) {
+        element.setAttribute('data-rune-view-id', view.viewId);
+      }
+    } catch { /* element may not be ready */ }
+
     store.timeline.add({
       type: 'render',
       viewId: view.viewId,
@@ -42,6 +51,13 @@ export function installLifecycleInterceptors(
   patchMethod(Base.prototype, '_onMount', (view) => {
     if (!view.viewId) return; // skip Enable instances
     store.components.setMounted(view.viewId, true);
+
+    // Mark DOM element for highlight detection (also mark on mount for SSR/hydration cases)
+    const element = view.element?.();
+    if (element instanceof HTMLElement) {
+      element.setAttribute('data-rune-view-id', view.viewId);
+    }
+
     store.timeline.add({
       type: 'mount',
       viewId: view.viewId,

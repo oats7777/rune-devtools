@@ -182,18 +182,15 @@ export class HighlightPanel {
 
   /**
    * Walks up the DOM from `el` to find the nearest element that has a
-   * Rune view mapping in the store (via data-view-id attribute or __runeViewId__ property).
+   * Rune view mapping in the store (via data-rune-view-id attribute set by interceptor).
    */
   private _findViewForElement(
     el: HTMLElement,
   ): { viewId: string; constructorName: string; element: HTMLElement } | null {
     let current: HTMLElement | null = el;
     while (current && current !== document.body) {
-      // Check for data-view-id attribute (set by interceptor)
-      const viewId =
-        (current as any).__runeViewId__ ??
-        current.dataset?.viewId ??
-        null;
+      // Check for data-rune-view-id attribute (set by lifecycle interceptor)
+      const viewId = current.dataset?.runeViewId ?? null;
 
       if (viewId) {
         const snapshot = this._store.components.get(viewId);
