@@ -36,7 +36,6 @@ export function initDevtools(options: DevtoolsOptions = {}): () => void {
 
     const { toolbar, panelContainer, highlightOverlay, destroy } = createShell({
       store,
-      rune: runeInstance,
       position,
       shortcut,
       defaultPanel,

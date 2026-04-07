@@ -166,36 +166,36 @@ export class PropertyRow {
     input.focus();
     input.select();
 
-    const commit = () => {
-      const raw = input.value;
-      let parsed: unknown = raw;
-      // Try to parse as JSON for numbers, booleans, null, objects
-      try {
-        parsed = JSON.parse(raw);
-      } catch {
-        // Keep as string
-        parsed = raw;
-      }
-      valueEl.removeChild(input);
-      valueEl.textContent = formatPrimitive(parsed);
-      this._onEdit?.(this._key, parsed);
-    };
+    let committed = false;
 
-    const cancel = () => {
-      valueEl.removeChild(input);
-      valueEl.textContent = originalTextContent;
+    const finish = (newValue?: unknown) => {
+      if (!input.parentElement) return; // already removed
+      input.remove();
+      if (newValue !== undefined) {
+        valueEl.textContent = formatPrimitive(newValue);
+        valueEl.style.color = valueColor(newValue);
+        this._onEdit?.(this._key, newValue);
+      } else {
+        valueEl.textContent = originalTextContent;
+      }
     };
 
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        commit();
+        committed = true;
+        const raw = input.value;
+        let parsed: unknown = raw;
+        try { parsed = JSON.parse(raw); } catch { parsed = raw; }
+        finish(parsed);
       } else if (e.key === 'Escape') {
         e.preventDefault();
-        cancel();
+        finish();
       }
     });
 
-    input.addEventListener('blur', cancel);
+    input.addEventListener('blur', () => {
+      if (!committed) finish();
+    });
   }
 }

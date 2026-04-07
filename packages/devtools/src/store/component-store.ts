@@ -91,6 +91,11 @@ export class ComponentStore {
     return ref.deref() !== undefined;
   }
 
+  /** Get the live View instance (if still alive). */
+  getLiveView(viewId: string): object | undefined {
+    return this._viewRefs.get(viewId)?.deref();
+  }
+
   updateData(viewId: string, data: unknown, renderCount: number): void {
     const view = this._views.get(viewId);
     if (view) {

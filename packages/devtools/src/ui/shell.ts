@@ -14,7 +14,6 @@ import { TimelinePanel } from './panels/timeline/TimelinePanelView';
 
 export interface ShellOptions {
   store: any; // DevtoolsStore — typed as any to avoid import coupling
-  rune: any; // rune registry singleton for view lookups
   position: 'bottom' | 'top';
   shortcut: string;
   defaultPanel: string;
@@ -140,15 +139,10 @@ export function createShell(options: ShellOptions): {
       activatePanel('tree');
     },
     (viewId, key, value) => {
-      // Find the live View instance via data-rune-view-id and rune registry
-      const el = document.querySelector(
-        `[data-rune-view-id="${viewId}"]`,
-      ) as HTMLElement | null;
-      if (!el || !options.rune) return;
-      const view = options.rune.getUnknownView(el);
-      if (!view) return;
-      // Mutate the view's data and trigger redraw
-      (view.data as any)[key] = value;
+      // Get the live View instance directly via stored WeakRef
+      const view = store.components.getLiveView(viewId) as any;
+      if (!view?.data || !view.redraw) return;
+      view.data[key] = value;
       view.redraw();
     },
   );
