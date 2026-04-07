@@ -10,7 +10,7 @@ describe('vite-plugin-rune-devtools', () => {
 
   it('injects script in development mode', () => {
     const plugin = runeDevtools();
-    const html = '<html><body></body></html>';
+    const html = '<html><head></head><body></body></html>';
     const result = (plugin.transformIndexHtml as any).handler(html, { server: {} });
     expect(result).toContain('@rune-ts/devtools');
     expect(result).toContain('initDevtools(');
@@ -18,7 +18,7 @@ describe('vite-plugin-rune-devtools', () => {
 
   it('passes options to initDevtools', () => {
     const plugin = runeDevtools({ position: 'top', maxEvents: 500 });
-    const html = '<html><body></body></html>';
+    const html = '<html><head></head><body></body></html>';
     const result = (plugin.transformIndexHtml as any).handler(html, { server: {} });
     expect(result).toContain('"position":"top"');
     expect(result).toContain('"maxEvents":500');
@@ -26,7 +26,7 @@ describe('vite-plugin-rune-devtools', () => {
 
   it('does not inject in production', () => {
     const plugin = runeDevtools();
-    const html = '<html><body></body></html>';
+    const html = '<html><head></head><body></body></html>';
     const result = (plugin.transformIndexHtml as any).handler(html, {});
     expect(result).toBe(html);
   });

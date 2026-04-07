@@ -78,6 +78,11 @@ export function installRenderingInterceptors(
         timestamp: ctx.startTime,
       };
 
+      // Re-set data-rune-view-id after redraw (rune-ts _redrawAttributes removes non-template attrs)
+      if (element instanceof HTMLElement) {
+        element.setAttribute('data-rune-view-id', view.viewId);
+      }
+
       store.addRedraw(record);
       store.emitRedraw(record);
       let clonedData: unknown;

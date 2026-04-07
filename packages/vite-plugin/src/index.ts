@@ -25,7 +25,7 @@ import { initDevtools } from '@rune-ts/devtools';
 initDevtools(${optionsJson});
 </script>`;
 
-        return html.replace('</body>', `${script}\n</body>`);
+        return html.replace('<head>', `<head>\n${script}`);
       },
     },
   };
