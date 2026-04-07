@@ -73,6 +73,16 @@ export class InspectorPanel {
     this.element.appendChild(this._contentEl);
   }
 
+  // ── Lifecycle ────────────────────────────────────────────────────
+
+  activate(): void {
+    this.refresh();
+  }
+
+  deactivate(): void {
+    // No refresh interval needed — inspector is event-driven via selectView()
+  }
+
   // ── Public API ────────────────────────────────────────────────────
 
   selectView(viewId: string): void {

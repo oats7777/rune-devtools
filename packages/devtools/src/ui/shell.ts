@@ -1,8 +1,16 @@
 import type { DEVTOOLS_MARKER } from '../constants';
+import type { TimelineEventType } from '../types';
 import { STYLES } from './styles';
 import { Toolbar } from './toolbar/ToolbarView';
 import { PanelContainer } from './panels/PanelContainerView';
 import { HighlightOverlay } from '../highlight/HighlightOverlay';
+import { TreePanel } from './panels/tree/TreePanelView';
+import { InspectorPanel } from './panels/inspector/InspectorPanelView';
+import { EventPanel } from './panels/events/EventPanelView';
+import { RedrawPanel } from './panels/redraw/RedrawPanelView';
+import { ListViewPanel } from './panels/listview/ListViewPanelView';
+import { HighlightPanel } from './panels/highlight/HighlightPanelView';
+import { TimelinePanel } from './panels/timeline/TimelinePanelView';
 
 export interface ShellOptions {
   store: any; // DevtoolsStore — typed as any to avoid import coupling
@@ -81,36 +89,158 @@ export function createShell(options: ShellOptions): {
   const toolbar = new Toolbar();
   container.appendChild(toolbar.element);
 
-  // 7. Wire toolbar ↔ panel container
+  // 7. Create highlight overlay (outside Shadow DOM, on document.body)
+  const highlightOverlay = new HighlightOverlay();
+
+  // ── 8. Create panels ────────────────────────────────────────────
+  const store = options.store;
+
+  // Panel references for cross-wiring (declared with let for forward refs)
+  let inspectorPanel: InspectorPanel;
+  let treePanel: TreePanel;
+
+  treePanel = new TreePanel(
+    store,
+    (viewId) => {
+      inspectorPanel.selectView(viewId);
+      // Auto-show data panel if a different panel is active
+      if (panelContainer.activePanel !== 'data') {
+        toolbar.setActivePanel('data');
+        panelContainer.show('data');
+        activatePanel('data');
+      }
+    },
+    (viewId) => {
+      if (viewId) {
+        const el = document.querySelector(
+          `[data-rune-view-id="${viewId}"]`,
+        ) as HTMLElement | null;
+        if (el) {
+          const snapshot = store.components.get(viewId);
+          const rect = el.getBoundingClientRect();
+          highlightOverlay.highlight(
+            el,
+            snapshot?.constructorName ?? '',
+            `${Math.round(rect.width)}\u00d7${Math.round(rect.height)}`,
+          );
+        }
+      } else {
+        highlightOverlay.clear();
+      }
+    },
+  );
+
+  inspectorPanel = new InspectorPanel(
+    store,
+    (viewId) => {
+      treePanel.selectView(viewId);
+      toolbar.setActivePanel('tree');
+      panelContainer.show('tree');
+      activatePanel('tree');
+    },
+  );
+
+  const eventPanel = new EventPanel(store);
+  const redrawPanel = new RedrawPanel(store);
+  const listViewPanel = new ListViewPanel(store);
+
+  const highlightPanel = new HighlightPanel(
+    store,
+    highlightOverlay,
+    (viewId) => {
+      treePanel.selectView(viewId);
+      inspectorPanel.selectView(viewId);
+      toolbar.setActivePanel('tree');
+      panelContainer.show('tree');
+      activatePanel('tree');
+    },
+  );
+
+  const timelinePanel = new TimelinePanel(store, (type: TimelineEventType, _viewId: string) => {
+    const panelMap: Record<string, string> = {
+      render: 'tree',
+      mount: 'tree',
+      unmount: 'tree',
+      redraw: 'redraw',
+      event: 'events',
+      dispatch: 'events',
+      listview: 'listview',
+      registry: 'tree',
+      ssr: 'tree',
+    };
+    const targetPanel = panelMap[type] ?? 'tree';
+    toolbar.setActivePanel(targetPanel);
+    panelContainer.show(targetPanel);
+    activatePanel(targetPanel);
+  });
+
+  // ── 9. Register panels ──────────────────────────────────────────
+  // Toolbar uses 'data' as ID but InspectorPanel has id='inspector'.
+  // Register using toolbar IDs for consistency.
+  const panels: Record<string, { element: HTMLElement; activate: () => void; deactivate: () => void }> = {
+    tree: treePanel,
+    data: inspectorPanel,
+    events: eventPanel,
+    redraw: redrawPanel,
+    listview: listViewPanel,
+    highlight: highlightPanel,
+    timeline: timelinePanel,
+  };
+
+  for (const [id, panel] of Object.entries(panels)) {
+    panelContainer.registerPanel(id, panel.element);
+  }
+
+  // ── 10. Panel activation / deactivation ─────────────────────────
+  let activePanelId: string | null = null;
+
+  function activatePanel(panelId: string): void {
+    if (activePanelId && activePanelId !== panelId) {
+      panels[activePanelId]?.deactivate();
+    }
+    panels[panelId]?.activate();
+    activePanelId = panelId;
+  }
+
+  function deactivateCurrentPanel(): void {
+    if (activePanelId) {
+      panels[activePanelId]?.deactivate();
+      activePanelId = null;
+    }
+  }
+
+  // ── 11. Wire toolbar ↔ panel container ──────────────────────────
   toolbar.onPanelChange = (panelId) => {
     if (panelId) {
       panelContainer.show(panelId);
+      activatePanel(panelId);
     } else {
       panelContainer.hide();
+      deactivateCurrentPanel();
     }
   };
 
   panelContainer.onClose = () => {
     toolbar.setActivePanel(null);
+    deactivateCurrentPanel();
   };
 
-  // 8. Wire up keyboard shortcut
+  // ── 12. Wire up keyboard shortcut ───────────────────────────────
   const shortcutHandler = createShortcutHandler(options.shortcut, () => {
     toolbar.toggle();
     if (!toolbar.expanded) {
       panelContainer.hide();
+      deactivateCurrentPanel();
     }
   });
   document.addEventListener('keydown', shortcutHandler);
-
-  // 9. Create highlight overlay (outside Shadow DOM, on document.body)
-  const highlightOverlay = new HighlightOverlay();
 
   return {
     toolbar,
     panelContainer,
     highlightOverlay,
     destroy() {
+      deactivateCurrentPanel();
       document.removeEventListener('keydown', shortcutHandler);
       host.remove();
       highlightOverlay.destroy();

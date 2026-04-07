@@ -37,7 +37,7 @@ export function initDevtools(options: DevtoolsOptions): () => void {
       store,
     );
 
-    const { destroy } = createShell({
+    const { toolbar, panelContainer, highlightOverlay, destroy } = createShell({
       store,
       position,
       shortcut,
