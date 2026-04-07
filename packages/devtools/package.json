@@ -2,6 +2,11 @@
   "name": "rune-devtools",
   "version": "1.0.1",
   "description": "Browser devtools overlay for the Rune framework",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oats7777/rune-devtools",
+    "directory": "packages/devtools"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
