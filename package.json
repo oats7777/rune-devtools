@@ -1,9 +1,8 @@
 {
   "name": "rune-devtools",
   "private": true,
-  "workspaces": ["packages/*"],
   "scripts": {
-    "build": "npm run build --workspaces",
+    "build": "pnpm -r run build",
     "test": "vitest run",
     "test:watch": "vitest"
   },
