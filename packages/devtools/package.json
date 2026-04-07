@@ -1,6 +1,6 @@
 {
   "name": "rune-devtools",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Browser devtools overlay for the Rune framework",
   "type": "module",
   "main": "./dist/index.js",
