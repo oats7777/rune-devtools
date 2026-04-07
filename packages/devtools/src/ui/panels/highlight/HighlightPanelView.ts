@@ -31,10 +31,8 @@ export class HighlightPanel {
   }
 
   deactivate(): void {
-    // Turn off highlight when panel is hidden
-    if (this._active) {
-      this._setActive(false);
-    }
+    // Highlight mode persists when switching panels — only turns off
+    // when the user explicitly toggles it off or presses Escape.
   }
 
   // ── Private helpers ───────────────────────────────────────────────
