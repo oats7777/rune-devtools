@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rune DevTools Playground</title>
+  <style>
+    /* Clean minimal dark theme to match devtools aesthetic */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0f0f13; color: #e0e0e0;
+      min-height: 100vh;
+      padding: 40px 20px 120px; /* extra bottom padding for devtools toolbar */
+    }
+    .app-container { max-width: 600px; margin: 0 auto; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #fff; }
+    h1 span { color: #1c75ff; }
+    .todo-input-row {
+      display: flex; gap: 8px; margin-bottom: 24px;
+    }
+    .todo-input-row input {
+      flex: 1; padding: 10px 14px; background: #1a1a2e;
+      border: 1px solid #2a2a3e; border-radius: 8px;
+      color: #e0e0e0; font-size: 14px; outline: none;
+    }
+    .todo-input-row input:focus { border-color: #1c75ff; }
+    .todo-input-row button {
+      padding: 10px 20px; background: #1c75ff; border: none;
+      border-radius: 8px; color: white; font-weight: 600;
+      cursor: pointer; font-size: 14px;
+    }
+    .todo-input-row button:hover { background: #1565e0; }
+    .todo-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; background: #16161a;
+      border-radius: 8px; margin-bottom: 8px;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .todo-item:hover { background: #1e1e2e; }
+    .todo-item.completed .todo-title {
+      text-decoration: line-through; color: #666;
+    }
+    .todo-checkbox {
+      width: 20px; height: 20px; border-radius: 6px;
+      border: 2px solid #444; display: flex;
+      align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .todo-checkbox.checked {
+      background: #1c75ff; border-color: #1c75ff;
+    }
+    .todo-title { font-size: 14px; flex: 1; }
+    .todo-delete {
+      color: #666; cursor: pointer; font-size: 18px;
+      padding: 0 4px;
+    }
+    .todo-delete:hover { color: #ff4444; }
+    .todo-footer {
+      display: flex; justify-content: space-between;
+      padding: 12px 0; color: #666; font-size: 13px;
+    }
+    .todo-footer button {
+      background: none; border: 1px solid #2a2a3e;
+      color: #aaa; padding: 4px 12px; border-radius: 6px;
+      cursor: pointer; font-size: 12px;
+    }
+    .todo-footer button:hover { border-color: #1c75ff; color: #1c75ff; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

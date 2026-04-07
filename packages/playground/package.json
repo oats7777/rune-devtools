@@ -1,0 +1,19 @@
+{
+  "name": "rune-devtools-playground",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "rune-ts": "^0.9.8",
+    "@rune-ts/devtools": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0",
+    "vite-plugin-rune-devtools": "workspace:*",
+    "typescript": "^5.3.0"
+  }
+}
