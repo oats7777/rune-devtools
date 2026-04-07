@@ -22,8 +22,8 @@ try {
   eventHelper = (rune as any)._eventHelper ?? null;
 } catch { /* graceful skip */ }
 
-export function initDevtools(options: DevtoolsOptions): () => void {
-  const { rune: runeInstance } = options;
+export function initDevtools(options: DevtoolsOptions = {}): () => void {
+  const runeInstance = options.rune ?? rune;
   const maxEvents = options.maxEvents ?? DEFAULTS.maxEvents;
   const position = options.position ?? DEFAULTS.position;
   const shortcut = options.shortcut ?? DEFAULTS.shortcut;

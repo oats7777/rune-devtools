@@ -85,7 +85,7 @@ export interface TimelineEntry {
 }
 
 export interface DevtoolsOptions {
-  rune: any;
+  rune?: any;
   position?: 'bottom' | 'top';
   shortcut?: string;
   maxEvents?: number;

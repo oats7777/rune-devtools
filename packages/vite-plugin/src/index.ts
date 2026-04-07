@@ -23,17 +23,7 @@ export default function runeDevtools(
         const script = `
 <script type="module">
   import { initDevtools } from '@rune-ts/devtools';
-  if (window.__rune__) {
-    initDevtools({ rune: window.__rune__, ...${optionsJson} });
-  } else {
-    const observer = new MutationObserver(() => {
-      if (window.__rune__) {
-        observer.disconnect();
-        initDevtools({ rune: window.__rune__, ...${optionsJson} });
-      }
-    });
-    observer.observe(document, { childList: true, subtree: true });
-  }
+  initDevtools(${optionsJson});
 </script>`;
 
         return html.replace('</body>', `${script}\n</body>`);
