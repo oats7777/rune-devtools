@@ -2,7 +2,7 @@ import { ComponentStore } from './component-store';
 import { EventStore } from './event-store';
 import { TimelineStore } from './timeline-store';
 import { DEFAULTS } from '../constants';
-import type { RedrawRecord, ListViewOpRecord } from '../types';
+import type { RedrawRecord, ListViewOpRecord, ViewSnapshot } from '../types';
 import { RingBuffer } from './ring-buffer';
 
 export class DevtoolsStore {
@@ -11,6 +11,12 @@ export class DevtoolsStore {
   readonly timeline: TimelineStore;
   readonly redraws: Map<string, RingBuffer<RedrawRecord>>;
   readonly listViewOps: Map<string, RingBuffer<ListViewOpRecord>>;
+
+  // Simple event callbacks for plugins
+  private _onViewRenderCallbacks: ((snapshot: ViewSnapshot) => void)[] = [];
+  private _onViewUnmountCallbacks: ((viewId: string) => void)[] = [];
+  private _onRedrawCallbacks: ((record: RedrawRecord) => void)[] = [];
+  private _onListViewMutationCallbacks: ((record: ListViewOpRecord) => void)[] = [];
 
   constructor(maxEvents = DEFAULTS.maxEvents) {
     this.components = new ComponentStore();
@@ -40,6 +46,46 @@ export class DevtoolsStore {
 
   getListViewOps(viewId: string): ListViewOpRecord[] {
     return this.listViewOps.get(viewId)?.toArray() ?? [];
+  }
+
+  onViewRender(callback: (snapshot: ViewSnapshot) => void): void {
+    this._onViewRenderCallbacks.push(callback);
+  }
+
+  onViewUnmount(callback: (viewId: string) => void): void {
+    this._onViewUnmountCallbacks.push(callback);
+  }
+
+  onRedraw(callback: (record: RedrawRecord) => void): void {
+    this._onRedrawCallbacks.push(callback);
+  }
+
+  onListViewMutation(callback: (record: ListViewOpRecord) => void): void {
+    this._onListViewMutationCallbacks.push(callback);
+  }
+
+  emitViewRender(snapshot: ViewSnapshot): void {
+    for (const cb of this._onViewRenderCallbacks) {
+      try { cb(snapshot); } catch (e) { console.warn('[rune-devtools] plugin callback error:', e); }
+    }
+  }
+
+  emitViewUnmount(viewId: string): void {
+    for (const cb of this._onViewUnmountCallbacks) {
+      try { cb(viewId); } catch (e) { console.warn('[rune-devtools] plugin callback error:', e); }
+    }
+  }
+
+  emitRedraw(record: RedrawRecord): void {
+    for (const cb of this._onRedrawCallbacks) {
+      try { cb(record); } catch (e) { console.warn('[rune-devtools] plugin callback error:', e); }
+    }
+  }
+
+  emitListViewMutation(record: ListViewOpRecord): void {
+    for (const cb of this._onListViewMutationCallbacks) {
+      try { cb(record); } catch (e) { console.warn('[rune-devtools] plugin callback error:', e); }
+    }
   }
 }
 

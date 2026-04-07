@@ -50,12 +50,14 @@ export function initDevtools(options: DevtoolsOptions): () => void {
       for (const plugin of options.plugins) {
         try {
           plugin.setup({
-            addPanel: (panel) => { /* delegate to shell */ },
+            addPanel: (panel) => {
+              panelContainer.registerPanel(panel.id, panel.createView());
+            },
             addTimelineEvent: (entry) => store.timeline.add(entry),
-            onViewRender: () => {},
-            onViewUnmount: () => {},
-            onRedraw: () => {},
-            onListViewMutation: () => {},
+            onViewRender: (cb) => store.onViewRender(cb),
+            onViewUnmount: (cb) => store.onViewUnmount(cb),
+            onRedraw: (cb) => store.onRedraw(cb),
+            onListViewMutation: (cb) => store.onListViewMutation(cb),
           });
         } catch (e) {
           console.warn(`[rune-devtools] plugin "${plugin.name}" failed:`, e);

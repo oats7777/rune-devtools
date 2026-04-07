@@ -79,6 +79,7 @@ export function installRenderingInterceptors(
       };
 
       store.addRedraw(record);
+      store.emitRedraw(record);
       let clonedData: unknown;
       try {
         clonedData = structuredClone(view.data);

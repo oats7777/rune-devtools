@@ -28,6 +28,7 @@ export function installLifecycleInterceptors(
       timestamp: performance.now(),
     };
     store.components.register(snapshot, view);
+    store.emitViewRender(snapshot);
 
     // Mark DOM element for highlight detection (after render, element should exist)
     try {
@@ -71,6 +72,7 @@ export function installLifecycleInterceptors(
   // _onUnmount on View.prototype
   patchMethod(View.prototype, '_onUnmount', (view) => {
     store.components.setMounted(view.viewId, false);
+    store.emitViewUnmount(view.viewId);
     store.timeline.add({
       type: 'unmount',
       viewId: view.viewId,

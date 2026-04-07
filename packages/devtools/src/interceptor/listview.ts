@@ -37,6 +37,7 @@ export function installListViewInterceptors(
         timestamp: performance.now(),
       };
       store.addListViewOp(record);
+      store.emitListViewMutation(record);
       store.timeline.add({
         type: 'listview',
         viewId: view.viewId,
@@ -62,6 +63,7 @@ export function installListViewInterceptors(
       timestamp: performance.now(),
     };
     store.addListViewOp(record);
+    store.emitListViewMutation(record);
     store.timeline.add({
       type: 'listview',
       viewId: view.viewId,
@@ -85,6 +87,7 @@ export function installListViewInterceptors(
       timestamp: performance.now(),
     };
     store.addListViewOp(record);
+    store.emitListViewMutation(record);
     store.timeline.add({
       type: 'listview',
       viewId: view.viewId,
@@ -109,6 +112,7 @@ export function installListViewInterceptors(
       timestamp: performance.now(),
     };
     store.addListViewOp(record);
+    store.emitListViewMutation(record);
   });
 
   // move
@@ -126,6 +130,7 @@ export function installListViewInterceptors(
       timestamp: performance.now(),
     };
     store.addListViewOp(record);
+    store.emitListViewMutation(record);
     store.timeline.add({
       type: 'listview',
       viewId: view.viewId,
@@ -148,6 +153,7 @@ export function installListViewInterceptors(
       timestamp: performance.now(),
     };
     store.addListViewOp(record);
+    store.emitListViewMutation(record);
     store.timeline.add({
       type: 'listview',
       viewId: view.viewId,
