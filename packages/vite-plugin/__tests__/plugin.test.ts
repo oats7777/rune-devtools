@@ -6,35 +6,28 @@ describe('vite-plugin-rune-devtools', () => {
     const plugin = runeDevtools();
     expect(plugin.name).toBe('vite-plugin-rune-devtools');
     expect(plugin.transformIndexHtml).toBeDefined();
-    expect(plugin.resolveId).toBeDefined();
-    expect(plugin.load).toBeDefined();
   });
 
-  it('resolves virtual module', () => {
+  it('injects script in development mode', () => {
     const plugin = runeDevtools();
-    const resolved = (plugin.resolveId as Function)('virtual:rune-devtools-init');
-    expect(resolved).toBe('\0virtual:rune-devtools-init');
+    const html = '<html><body></body></html>';
+    const result = (plugin.transformIndexHtml as any).handler(html, { server: {} });
+    expect(result).toContain('@rune-ts/devtools');
+    expect(result).toContain('initDevtools(');
   });
 
-  it('loads virtual module with initDevtools call', () => {
-    const plugin = runeDevtools({ position: 'top' });
-    const code = (plugin.load as Function)('\0virtual:rune-devtools-init');
-    expect(code).toContain("import { initDevtools } from '@rune-ts/devtools'");
-    expect(code).toContain('initDevtools(');
-    expect(code).toContain('"position":"top"');
-  });
-
-  it('injects script tag in development mode', () => {
-    const plugin = runeDevtools();
-    const result = (plugin.transformIndexHtml as any).handler('<html><body></body></html>', { server: {} });
-    expect(result).toHaveLength(1);
-    expect(result[0].tag).toBe('script');
-    expect(result[0].attrs.src).toBe('virtual:rune-devtools-init');
+  it('passes options to initDevtools', () => {
+    const plugin = runeDevtools({ position: 'top', maxEvents: 500 });
+    const html = '<html><body></body></html>';
+    const result = (plugin.transformIndexHtml as any).handler(html, { server: {} });
+    expect(result).toContain('"position":"top"');
+    expect(result).toContain('"maxEvents":500');
   });
 
   it('does not inject in production', () => {
     const plugin = runeDevtools();
-    const result = (plugin.transformIndexHtml as any).handler('<html><body></body></html>', {});
-    expect(result).toBe('<html><body></body></html>');
+    const html = '<html><body></body></html>';
+    const result = (plugin.transformIndexHtml as any).handler(html, {});
+    expect(result).toBe(html);
   });
 });
