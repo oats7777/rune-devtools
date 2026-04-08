@@ -131,6 +131,19 @@ describe('Interceptor Integration', () => {
       expect(el.getAttribute('data-rune-view-id')).toBe(view.viewId);
     });
 
+    it('captures data before/after in redraw record', () => {
+      const view = new SimpleView({ count: 0 });
+      view.render();
+
+      (view.data as any).count = 42;
+      view.redraw();
+
+      const redraws = store.getRedraws(view.viewId);
+      expect(redraws).toHaveLength(1);
+      expect(redraws[0].dataBefore).toEqual({ count: 0 });
+      expect(redraws[0].dataAfter).toEqual({ count: 42 });
+    });
+
     it('updates store data after redraw', () => {
       const view = new SimpleView({ count: 0 });
       view.render();

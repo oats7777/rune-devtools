@@ -45,15 +45,25 @@ export function installRenderingInterceptors(
   View: any,
   store: DevtoolsStore,
 ): void {
-  const contextMap = new WeakMap<object, { before: Map<string, string>; renderCount: number; startTime: number }>();
+  const contextMap = new WeakMap<object, { before: Map<string, string>; dataBefore: unknown; renderCount: number; startTime: number }>();
+
+  function safeClone(data: unknown): unknown {
+    try { return structuredClone(data); } catch {}
+    try { return JSON.parse(JSON.stringify(data)); } catch {}
+    return { __unserializable__: true };
+  }
 
   patchMethodAround(
     View.prototype,
     'redraw',
     (view) => {
       const element = view.element?.();
+      // Use the last known snapshot from store as "before" since
+      // view.data is already mutated before redraw() is called
+      const storedSnapshot = store.components.get(view.viewId);
       contextMap.set(view, {
         before: element ? snapshotAttributes(element) : new Map(),
+        dataBefore: storedSnapshot?.data ?? safeClone(view.data),
         renderCount: view.renderCount,
         startTime: performance.now(),
       });
@@ -68,6 +78,8 @@ export function installRenderingInterceptors(
       const duration = performance.now() - ctx.startTime;
       const attributeChanges = diffAttributes(ctx.before, after);
 
+      const dataAfter = safeClone(view.data);
+
       const record = {
         viewId: view.viewId,
         constructorName: view.constructor.name,
@@ -75,6 +87,8 @@ export function installRenderingInterceptors(
         renderCountAfter: view.renderCount,
         duration,
         attributeChanges,
+        dataBefore: ctx.dataBefore,
+        dataAfter,
         timestamp: ctx.startTime,
       };
 

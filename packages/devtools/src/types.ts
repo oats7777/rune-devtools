@@ -17,6 +17,8 @@ export interface RedrawRecord {
   renderCountAfter: number;
   duration: number;
   attributeChanges: AttributeChange[];
+  dataBefore: unknown;
+  dataAfter: unknown;
   timestamp: number;
 }
 

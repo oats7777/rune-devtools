@@ -86,13 +86,17 @@ export class RedrawRow {
     durEl.style.cssText = `font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; font-weight: 600; color: ${durationColor(this._record.duration)}; flex-shrink: 0;`;
     row.appendChild(durEl);
 
-    // Expand button (only if attribute changes exist)
-    if (this._record.attributeChanges.length > 0) {
+    // Expand button (if attribute changes or data diff exist)
+    const hasDataDiff = this._hasDataDiff();
+    if (this._record.attributeChanges.length > 0 || hasDataDiff) {
       const expandBtn = document.createElement('button');
-      expandBtn.textContent = `${this._record.attributeChanges.length} attr`;
+      const parts: string[] = [];
+      if (hasDataDiff) parts.push('diff');
+      if (this._record.attributeChanges.length > 0) parts.push(`${this._record.attributeChanges.length} attr`);
+      expandBtn.textContent = parts.join(' + ');
       expandBtn.style.cssText =
         'padding: 1px 6px; border-radius: 6px; border: none; cursor: pointer; font-size: 11px; font-family: inherit; background: rgba(255,255,255,0.07); color: #aaa; flex-shrink: 0; transition: background 0.15s ease;';
-      expandBtn.title = 'Toggle attribute changes';
+      expandBtn.title = 'Toggle details';
       expandBtn.addEventListener('click', () => this._toggleExpand(expandBtn));
       row.appendChild(expandBtn);
     }
@@ -116,11 +120,91 @@ export class RedrawRow {
       this._detailEl.innerHTML = '';
       btn.style.background = 'rgba(28,117,255,0.18)';
       btn.style.color = '#1c75ff';
-      this._renderAttributeChanges(this._detailEl);
+      if (this._hasDataDiff()) {
+        this._renderDataDiff(this._detailEl);
+      }
+      if (this._record.attributeChanges.length > 0) {
+        this._renderAttributeChanges(this._detailEl);
+      }
     } else {
       this._detailEl.style.display = 'none';
       btn.style.background = 'rgba(255,255,255,0.07)';
       btn.style.color = '#aaa';
+    }
+  }
+
+  private _hasDataDiff(): boolean {
+    const { dataBefore, dataAfter } = this._record;
+    if (dataBefore === undefined || dataAfter === undefined) return false;
+    try {
+      return JSON.stringify(dataBefore) !== JSON.stringify(dataAfter);
+    } catch {
+      return false;
+    }
+  }
+
+  private _renderDataDiff(container: HTMLElement): void {
+    const { dataBefore, dataAfter } = this._record;
+    if (!dataBefore || !dataAfter || typeof dataBefore !== 'object' || typeof dataAfter !== 'object') return;
+
+    const header = document.createElement('div');
+    header.textContent = 'Data Changes';
+    header.style.cssText =
+      'font-size: 10px; font-weight: 600; text-transform: uppercase; color: #666; padding: 4px 0 2px 0; letter-spacing: 0.05em;';
+    container.appendChild(header);
+
+    const before = dataBefore as Record<string, unknown>;
+    const after = dataAfter as Record<string, unknown>;
+    const allKeys = new Set([...Object.keys(before), ...Object.keys(after)]);
+
+    for (const key of allKeys) {
+      const oldVal = before[key];
+      const newVal = after[key];
+      let oldStr: string, newStr: string;
+      try { oldStr = JSON.stringify(oldVal); } catch { oldStr = String(oldVal); }
+      try { newStr = JSON.stringify(newVal); } catch { newStr = String(newVal); }
+      if (oldStr === newStr) continue;
+
+      const line = document.createElement('div');
+      line.style.cssText =
+        "display: flex; align-items: baseline; gap: 6px; padding: 2px 0; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 11px;";
+
+      const keyEl = document.createElement('span');
+      keyEl.textContent = key;
+      keyEl.style.cssText = 'color: #aaa; flex-shrink: 0;';
+      line.appendChild(keyEl);
+
+      if (!(key in before)) {
+        // added
+        const valEl = document.createElement('span');
+        valEl.textContent = newStr;
+        valEl.style.cssText = 'color: #4caf50;';
+        line.appendChild(valEl);
+      } else if (!(key in after)) {
+        // removed
+        const valEl = document.createElement('span');
+        valEl.textContent = oldStr;
+        valEl.style.cssText = 'color: #ef4444; text-decoration: line-through;';
+        line.appendChild(valEl);
+      } else {
+        // modified
+        const oldEl = document.createElement('span');
+        oldEl.textContent = oldStr;
+        oldEl.style.cssText = 'color: #ef4444; text-decoration: line-through;';
+        line.appendChild(oldEl);
+
+        const arrow = document.createElement('span');
+        arrow.textContent = '→';
+        arrow.style.cssText = 'color: #555;';
+        line.appendChild(arrow);
+
+        const newEl = document.createElement('span');
+        newEl.textContent = newStr;
+        newEl.style.cssText = 'color: #4caf50;';
+        line.appendChild(newEl);
+      }
+
+      container.appendChild(line);
     }
   }
 
