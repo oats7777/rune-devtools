@@ -2,6 +2,7 @@
   "name": "rune-devtools-vite",
   "version": "1.0.2",
   "description": "Vite plugin for rune-devtools — auto-injects devtools in dev mode",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/oats7777/rune-devtools",

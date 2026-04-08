@@ -2,6 +2,7 @@
   "name": "rune-devtools",
   "version": "1.0.2",
   "description": "Browser devtools overlay for the Rune framework",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/oats7777/rune-devtools",
