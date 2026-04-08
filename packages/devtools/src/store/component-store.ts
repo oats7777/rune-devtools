@@ -1,4 +1,4 @@
-import { pipe, filter, toArray } from '@fxts/core';
+import { pipe, filter, map, toArray } from '@fxts/core';
 import type { ViewSnapshot } from '../types';
 import { DEFAULTS } from '../constants';
 
@@ -36,8 +36,9 @@ export class ComponentStore {
     return pipe(
       rootIds,
       filter((id) => this._views.has(id)),
+      map((id) => this._views.get(id)!),
       toArray,
-    ).map((id) => this._views.get(id)!);
+    );
   }
 
   getChildren(viewId: string): ViewSnapshot[] {
@@ -46,8 +47,9 @@ export class ComponentStore {
     return pipe(
       childIds,
       filter((id) => this._views.has(id)),
+      map((id) => this._views.get(id)!),
       toArray,
-    ).map((id) => this._views.get(id)!);
+    );
   }
 
   setMounted(viewId: string, isMounted: boolean): void {

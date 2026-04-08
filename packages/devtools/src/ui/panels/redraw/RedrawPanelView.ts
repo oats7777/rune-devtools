@@ -1,3 +1,4 @@
+import { pipe, flatMap, filter, toArray, sort } from '@fxts/core';
 import type { DevtoolsStore } from '../../../store';
 import type { RedrawRecord } from '../../../types';
 import { RedrawRow } from './RedrawRowView';
@@ -75,18 +76,13 @@ export class RedrawPanel {
   // ── Public API ────────────────────────────────────────────────────
 
   refresh(): void {
-    // Collect all redraws across all views, reverse-chronological order
-    const all: RedrawRecord[] = [];
-    for (const buffer of this._store.redraws.values()) {
-      for (const record of buffer.toArray()) {
-        if (record.timestamp > this._clearedAt) {
-          all.push(record);
-        }
-      }
-    }
-
-    // Sort newest first
-    all.sort((a, b) => b.timestamp - a.timestamp);
+    const all = pipe(
+      this._store.redraws.values(),
+      flatMap((buffer) => buffer.toArray()),
+      filter((record) => record.timestamp > this._clearedAt),
+      sort((a, b) => b.timestamp - a.timestamp),
+      toArray,
+    );
 
     if (all.length === 0) {
       this._listEl.style.display = 'none';

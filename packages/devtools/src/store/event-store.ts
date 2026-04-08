@@ -1,3 +1,4 @@
+import { pipe, flatMap, toArray } from '@fxts/core';
 import { RingBuffer } from './ring-buffer';
 import type { EventListenerRecord, EventDispatchRecord } from '../types';
 
@@ -20,7 +21,7 @@ export class EventStore {
   }
 
   getAllListeners(): EventListenerRecord[] {
-    return [...this._listeners.values()].flat();
+    return pipe(this._listeners.values(), flatMap((v) => v), toArray);
   }
 
   addDispatch(record: EventDispatchRecord): void {

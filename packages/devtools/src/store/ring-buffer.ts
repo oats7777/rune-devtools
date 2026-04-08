@@ -1,3 +1,5 @@
+import { pipe, range, map, toArray as fxToArray } from '@fxts/core';
+
 export class RingBuffer<T> implements Iterable<T> {
   private _buffer: (T | undefined)[];
   private _head = 0;
@@ -34,11 +36,11 @@ export class RingBuffer<T> implements Iterable<T> {
   }
 
   toArray(): T[] {
-    const result: T[] = [];
-    for (let i = 0; i < this._size; i++) {
-      result.push(this._buffer[(this._head + i) % this._capacity]! as T);
-    }
-    return result;
+    return pipe(
+      range(this._size),
+      map((i) => this._buffer[(this._head + i) % this._capacity]! as T),
+      fxToArray,
+    );
   }
 
   [Symbol.iterator](): Iterator<T> {

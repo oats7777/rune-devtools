@@ -1,14 +1,17 @@
-import { pipe, filter, map, toArray } from '@fxts/core';
+import { pipe, filter, map, reduce, toArray } from '@fxts/core';
 import { patchMethodAround } from './patch';
 import type { DevtoolsStore } from '../store';
 import type { AttributeChange } from '../types';
 
 function snapshotAttributes(element: HTMLElement): Map<string, string> {
-  const attrs = new Map<string, string>();
-  for (const { name, value } of element.attributes) {
-    attrs.set(name, value);
-  }
-  return attrs;
+  return reduce(
+    (attrs, { name, value }: Attr) => {
+      attrs.set(name, value);
+      return attrs;
+    },
+    new Map<string, string>(),
+    element.attributes as unknown as Iterable<Attr>,
+  );
 }
 
 function diffAttributes(
