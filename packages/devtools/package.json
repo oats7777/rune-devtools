@@ -28,6 +28,7 @@
     "rune-ts": ">=0.9.8"
   },
   "devDependencies": {
+    "rune-ts": "^0.9.8",
     "vite": "^6.0.0"
   },
   "dependencies": {
