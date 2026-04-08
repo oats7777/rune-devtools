@@ -212,7 +212,7 @@ export class RedrawPanel {
       },
       new Map<string, ViewStats>(),
       records,
-    ) as Map<string, ViewStats>;
+    );
 
     // Convert to array, sort by total time descending
     const stats = pipe(

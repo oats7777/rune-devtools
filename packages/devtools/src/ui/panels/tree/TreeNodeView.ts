@@ -40,12 +40,6 @@ export class TreeNode {
 
   get children(): readonly TreeNode[] { return this._children; }
 
-  /** Whether the node's children are currently visible. */
-  get expanded(): boolean { return this._expanded; }
-
-  /** The viewId of this node's parent, sourced from the snapshot. */
-  get parentViewId(): string | null { return this._snapshot.parentViewId; }
-
   // Row sub-elements that need updating
   private _dotEl: HTMLElement;
   private _nameEl: HTMLElement;
@@ -147,11 +141,6 @@ export class TreeNode {
   deselect(): void {
     this._selected = false;
     this._rowEl.classList.remove('selected');
-  }
-
-  /** Toggle expand/collapse programmatically (e.g. from keyboard navigation). */
-  toggleExpanded(): void {
-    this._toggleExpanded();
   }
 
   /** Re-read children from store and reconcile DOM child nodes. */
