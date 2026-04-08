@@ -1,3 +1,4 @@
+import { pipe, filter, each } from '@fxts/core';
 import type { DevtoolsStore } from '../../../store';
 import { TreeNode } from './TreeNodeView';
 
@@ -31,7 +32,7 @@ export class TreePanel {
 
     this._searchInput = document.createElement('input');
     this._searchInput.type = 'text';
-    this._searchInput.placeholder = 'Search components…';
+    this._searchInput.placeholder = 'Search (supports /regex/)';
     this._searchInput.style.cssText =
       'width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 4px 8px; color: #e0e0e0; font-size: 12px; outline: none; font-family: system-ui, sans-serif;';
 
@@ -140,34 +141,116 @@ export class TreePanel {
     }
   }
 
-  private _applyFilter(): void {
-    const query = this._searchInput.value.trim().toLowerCase();
-    if (!query) {
-      // Show all
-      for (const node of this._nodeMap.values()) {
-        node.element.style.display = '';
+  /**
+   * Build a matcher function from the query string.
+   * If the query starts with `/`, it is parsed as a regex (e.g. `/Todo.*View/i`).
+   * Otherwise a plain case-insensitive substring match is returned.
+   * Returns null when the query is empty.
+   */
+  private _buildMatcher(raw: string): ((s: string) => boolean) | null {
+    const query = raw.trim();
+    if (!query) return null;
+
+    if (query.startsWith('/')) {
+      // Attempt to parse as /pattern/flags
+      const lastSlash = query.lastIndexOf('/');
+      const pattern = lastSlash > 0 ? query.slice(1, lastSlash) : query.slice(1);
+      const flags = lastSlash > 0 ? query.slice(lastSlash + 1) : '';
+      try {
+        const re = new RegExp(pattern, flags);
+        return (s) => re.test(s);
+      } catch {
+        // Malformed regex — fall back to literal substring search on the raw input
+        const lower = query.toLowerCase();
+        return (s) => s.toLowerCase().includes(lower);
       }
+    }
+
+    const lower = query.toLowerCase();
+    return (s) => s.toLowerCase().includes(lower);
+  }
+
+  /**
+   * Recursively walk a nested value and return true if any primitive leaf
+   * satisfies the matcher.
+   */
+  private _deepDataMatch(value: unknown, matcher: (s: string) => boolean): boolean {
+    if (value === null || value === undefined) return false;
+
+    if (typeof value === 'string') return matcher(value);
+    if (typeof value === 'number' || typeof value === 'boolean') {
+      return matcher(String(value));
+    }
+
+    if (Array.isArray(value)) {
+      return value.some((item) => this._deepDataMatch(item, matcher));
+    }
+
+    if (typeof value === 'object') {
+      return Object.values(value as Record<string, unknown>).some((v) =>
+        this._deepDataMatch(v, matcher),
+      );
+    }
+
+    return false;
+  }
+
+  private _applyFilter(): void {
+    const matcher = this._buildMatcher(this._searchInput.value);
+
+    if (!matcher) {
+      // Show all nodes, clear any highlight remnants
+      pipe(
+        this._nodeMap.values(),
+        each((node) => {
+          node.element.style.display = '';
+          node.element.style.background = '';
+        }),
+      );
       return;
     }
 
     const allSnapshots = this._store.components.getAll();
-    const matchingIds = new Set<string>();
 
+    // Step 1 — find directly matching view IDs
+    const directMatchIds = new Set<string>();
     for (const snap of allSnapshots) {
-      const nameMatch = snap.constructorName.toLowerCase().includes(query);
-      let dataMatch = false;
-      try {
-        dataMatch = JSON.stringify(snap.data).toLowerCase().includes(query);
-      } catch {
-        // ignore
-      }
+      const nameMatch = matcher(snap.constructorName);
+      const dataMatch = this._deepDataMatch(snap.data, matcher);
       if (nameMatch || dataMatch) {
-        matchingIds.add(snap.viewId);
+        directMatchIds.add(snap.viewId);
       }
     }
 
-    for (const [viewId, node] of this._nodeMap) {
-      node.element.style.display = matchingIds.has(viewId) ? '' : 'none';
+    // Step 2 — collect ancestor IDs so the tree path stays visible
+    const ancestorIds = new Set<string>();
+    for (const viewId of directMatchIds) {
+      let snap = this._store.components.get(viewId);
+      while (snap?.parentViewId) {
+        if (ancestorIds.has(snap.parentViewId)) break; // already walked this chain
+        ancestorIds.add(snap.parentViewId);
+        snap = this._store.components.get(snap.parentViewId);
+      }
     }
+
+    // Step 3 — apply visibility and highlight
+    pipe(
+      this._nodeMap.entries() as IterableIterator<[string, TreeNode]>,
+      filter(([_id, _node]) => true), // keep as iterable for pipe
+      each(([viewId, node]) => {
+        const isDirect = directMatchIds.has(viewId);
+        const isAncestor = ancestorIds.has(viewId);
+
+        if (isDirect || isAncestor) {
+          node.element.style.display = '';
+          node.element.style.background = isDirect
+            ? 'rgba(255, 200, 50, 0.08)'
+            : '';
+        } else {
+          node.element.style.display = 'none';
+          node.element.style.background = '';
+        }
+      }),
+    );
   }
 }
