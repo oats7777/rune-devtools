@@ -10,6 +10,7 @@ export class RedrawPanel {
   private _listEl: HTMLElement;
   private _emptyEl: HTMLElement;
   private _refreshInterval: number | null = null;
+  private _lastCount = 0;
 
   // Local cleared-at timestamp: ignore records before this
   private _clearedAt = 0;
@@ -87,16 +88,20 @@ export class RedrawPanel {
     // Sort newest first
     all.sort((a, b) => b.timestamp - a.timestamp);
 
-    this._listEl.innerHTML = '';
-
     if (all.length === 0) {
       this._listEl.style.display = 'none';
       this._emptyEl.style.display = '';
+      this._lastCount = 0;
       return;
     }
 
+    // Only rebuild DOM if record count changed (preserve expanded state)
+    if (all.length === this._lastCount) return;
+    this._lastCount = all.length;
+
     this._emptyEl.style.display = 'none';
     this._listEl.style.display = '';
+    this._listEl.innerHTML = '';
 
     for (const record of all) {
       const row = new RedrawRow(record);
