@@ -12,6 +12,8 @@ export class TreePanel {
   private _treeContainer: HTMLElement;
   private _selectedViewId: string | null = null;
   private _refreshInterval: number | null = null;
+  private _active = false;
+  private _keydownHandler: ((e: KeyboardEvent) => void) | null = null;
 
   // Map of all known tree nodes for fast lookups
   private _nodeMap = new Map<string, TreeNode>();
@@ -45,7 +47,6 @@ export class TreePanel {
     this._treeContainer.style.cssText =
       'flex: 1; overflow: auto; padding: 4px 0; outline: none;';
     this._treeContainer.tabIndex = 0;
-    this._treeContainer.addEventListener('keydown', (e) => this._handleKeyDown(e));
     this.element.appendChild(this._treeContainer);
 
     // Initial build
@@ -55,17 +56,29 @@ export class TreePanel {
   // ── Lifecycle ────────────────────────────────────────────────────
 
   activate(): void {
+    this._active = true;
     this.refresh();
     if (this._refreshInterval === null) {
       this._refreshInterval = window.setInterval(() => this.refresh(), 500);
     }
-    this._treeContainer.focus();
+    // Listen on document so keyboard works even inside Shadow DOM
+    if (!this._keydownHandler) {
+      this._keydownHandler = (e: KeyboardEvent) => {
+        if (this._active) this._handleKeyDown(e);
+      };
+      document.addEventListener('keydown', this._keydownHandler);
+    }
   }
 
   deactivate(): void {
+    this._active = false;
     if (this._refreshInterval !== null) {
       clearInterval(this._refreshInterval);
       this._refreshInterval = null;
+    }
+    if (this._keydownHandler) {
+      document.removeEventListener('keydown', this._keydownHandler);
+      this._keydownHandler = null;
     }
   }
 
@@ -267,7 +280,9 @@ export class TreePanel {
 
   private _handleKeyDown(e: KeyboardEvent): void {
     // Don't interfere while the search input is focused
-    if (document.activeElement === this._searchInput) return;
+    // In Shadow DOM, check both document.activeElement and shadowRoot.activeElement
+    const active = (this._searchInput.getRootNode() as ShadowRoot)?.activeElement ?? document.activeElement;
+    if (active === this._searchInput) return;
 
     const nav = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter'];
     if (!nav.includes(e.key)) return;
