@@ -1,5 +1,32 @@
 import { patchMethod } from './patch';
 import type { DevtoolsStore } from '../store';
+import type { SourceLocation } from '../types';
+
+function resolveSourceLocation(view: any): SourceLocation | null {
+  // 1. Check static __source (injected by Vite plugin transform)
+  const source = view.constructor?.__source;
+  if (source?.file && source?.line) {
+    return { file: source.file, line: source.line, column: source.column };
+  }
+
+  // 2. Fallback: parse stack trace
+  try {
+    const stack = new Error().stack;
+    if (!stack) return null;
+    const lines = stack.split('\n');
+    // Skip Error, resolveSourceLocation, interceptor, patchMethod wrapper frames
+    for (const line of lines) {
+      // Match typical stack frame: "at ... (file:line:col)" or "at file:line:col"
+      const match = line.match(/(?:at\s+.*?\(|at\s+)(\/[^:]+|https?:\/\/[^:]+):(\d+):(\d+)/);
+      if (!match) continue;
+      const file = match[1];
+      // Skip internal frames
+      if (file.includes('rune-devtools') || file.includes('node_modules/rune-ts')) continue;
+      return { file, line: parseInt(match[2], 10), column: parseInt(match[3], 10) };
+    }
+  } catch { /* ignore */ }
+  return null;
+}
 
 export function installLifecycleInterceptors(
   View: any,
@@ -25,6 +52,7 @@ export function installLifecycleInterceptors(
       renderCount: view.renderCount,
       isMounted: false,
       isSSR: false,
+      sourceLocation: resolveSourceLocation(view),
       timestamp: performance.now(),
     };
     store.components.register(snapshot, view);

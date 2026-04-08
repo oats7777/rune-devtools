@@ -1,5 +1,6 @@
 import type { ViewSnapshot } from '../../../types';
 import type { ComponentStore } from '../../../store/component-store';
+import { openInEditor, hasSourceLocation } from '../../open-editor';
 
 /**
  * Generates a deterministic hue for a constructor name using a simple hash.
@@ -199,9 +200,24 @@ export class TreeNode {
     this._dotEl.style.background = snapshot.isMounted ? '#4caf50' : '#555';
     this._dotEl.title = snapshot.isMounted ? 'Mounted' : 'Unmounted';
 
-    // Name color
+    // Name color + source link
     this._nameEl.textContent = snapshot.constructorName;
     this._nameEl.style.color = colorForName(snapshot.constructorName);
+    if (hasSourceLocation(snapshot)) {
+      this._nameEl.style.cursor = 'pointer';
+      this._nameEl.style.textDecoration = 'underline';
+      this._nameEl.style.textDecorationColor = 'rgba(255,255,255,0.2)';
+      this._nameEl.title = `${snapshot.sourceLocation!.file}:${snapshot.sourceLocation!.line} (click to open)`;
+      this._nameEl.onclick = (e) => {
+        e.stopPropagation();
+        openInEditor(snapshot.sourceLocation!);
+      };
+    } else {
+      this._nameEl.style.cursor = '';
+      this._nameEl.style.textDecoration = '';
+      this._nameEl.title = '';
+      this._nameEl.onclick = null;
+    }
 
     // Preview
     this._previewEl.textContent = dataPreview(snapshot.data);

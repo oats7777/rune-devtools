@@ -1,3 +1,9 @@
+export interface SourceLocation {
+  file: string;
+  line: number;
+  column?: number;
+}
+
 export interface ViewSnapshot {
   viewId: string;
   constructorName: string;
@@ -7,6 +13,7 @@ export interface ViewSnapshot {
   renderCount: number;
   isMounted: boolean;
   isSSR: boolean;
+  sourceLocation: SourceLocation | null;
   timestamp: number;
 }
 

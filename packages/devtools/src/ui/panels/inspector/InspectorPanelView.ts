@@ -1,6 +1,7 @@
 import type { DevtoolsStore } from '../../../store';
 import type { ViewSnapshot } from '../../../types';
 import { PropertyRow } from './PropertyRowView';
+import { openInEditor, hasSourceLocation } from '../../open-editor';
 
 /**
  * Creates a collapsible section element.
@@ -245,6 +246,31 @@ export class InspectorPanel {
     for (const [key, val] of metaFields) {
       const row = new PropertyRow(key, val, undefined, 0);
       metaBody.appendChild(row.element);
+    }
+
+    // Source location link
+    if (hasSourceLocation(snapshot)) {
+      const loc = snapshot.sourceLocation!;
+      const sourceRow = document.createElement('div');
+      sourceRow.style.cssText =
+        'display: flex; align-items: baseline; gap: 6px; padding: 2px 8px; min-height: 22px;';
+
+      const keyEl = document.createElement('span');
+      keyEl.textContent = 'source:';
+      keyEl.style.cssText =
+        "font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: #aaa; flex-shrink: 0;";
+      sourceRow.appendChild(keyEl);
+
+      const linkEl = document.createElement('span');
+      const fileName = loc.file.split('/').pop() ?? loc.file;
+      linkEl.textContent = `${fileName}:${loc.line}`;
+      linkEl.style.cssText =
+        "font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: #1c75ff; cursor: pointer; text-decoration: underline; text-decoration-color: rgba(28,117,255,0.3);";
+      linkEl.title = `${loc.file}:${loc.line}`;
+      linkEl.addEventListener('click', () => openInEditor(loc));
+      sourceRow.appendChild(linkEl);
+
+      metaBody.appendChild(sourceRow);
     }
 
     this._contentEl.appendChild(metaSection);
