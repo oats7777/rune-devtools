@@ -1,6 +1,6 @@
 {
   "name": "rune-devtools-vite",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Vite plugin for rune-devtools — auto-injects devtools in dev mode",
   "repository": {
     "type": "git",

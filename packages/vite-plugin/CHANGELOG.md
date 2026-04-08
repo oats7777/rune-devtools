@@ -1,5 +1,20 @@
 # rune-devtools-vite
 
+## 1.0.2
+
+### Patch Changes
+
+- [`bf2e123`](https://github.com/oats7777/rune-devtools/commit/bf2e123e27aeffb3c15ab4bd87b97b371584b7f9) Thanks [@oats7777](https://github.com/oats7777)! - - $r console integration: access selected View via `$r` in browser console
+  - State history: data diff (before/after) in Redraw Tracker
+  - Source location linking: click class name to open in VSCode/Cursor/WebStorm
+  - Vite plugin transform: auto-inject `__source` metadata on View classes
+  - Performance summary: per-view aggregate stats with slow view warnings
+  - Enhanced search: regex support, deep data matching, ancestor visibility
+  - Improved data processing with @fxts/core pipelines
+  - Integration tests with real rune-ts Views (42 tests)
+- Updated dependencies [[`bf2e123`](https://github.com/oats7777/rune-devtools/commit/bf2e123e27aeffb3c15ab4bd87b97b371584b7f9)]:
+  - rune-devtools@1.0.2
+
 ## 1.0.1
 
 ### Patch Changes
