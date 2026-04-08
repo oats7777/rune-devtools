@@ -103,6 +103,18 @@ export function createShell(options: ShellOptions): {
     store,
     (viewId) => {
       inspectorPanel.selectView(viewId);
+      // Expose selected view as $r in console
+      const liveView = store.components.getLiveView(viewId);
+      if (liveView) {
+        (window as any).$r = liveView;
+        console.log(
+          '%c$r%c = %s %o',
+          'color: #1c75ff; font-weight: bold',
+          'color: inherit',
+          (liveView as any).constructor?.name ?? viewId,
+          liveView,
+        );
+      }
       // Auto-show data panel if a different panel is active
       if (panelContainer.activePanel !== 'data') {
         toolbar.setActivePanel('data');
